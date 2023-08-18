@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/shch989/Golang_Fiber_Project/database"
 	"github.com/shch989/Golang_Fiber_Project/models/entity"
@@ -26,6 +27,16 @@ func UserHandlerCreate(c *fiber.Ctx) error {
 	if err := c.BodyParser(user); err != nil {
 		return err
 	}
+
+	validate := validator.New()
+	errValidate := validate.Struct(user)
+	if errValidate != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "failed",
+			"error":   errValidate.Error(),
+		})
+	}
+
 	newUser := entity.User{
 		Name:    user.Name,
 		Email:   user.Email,
