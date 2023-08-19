@@ -116,3 +116,26 @@ func UserHandlerUpdate(c *fiber.Ctx) error {
 		"data":    user,
 	})
 }
+
+func UserHandlerDelete(c *fiber.Ctx) error {
+	userId := c.Params("id")
+	var user entity.User
+
+	err := database.DB.Where("id = ?", userId).First(&user).Error
+	if err != nil {
+		return c.Status(404).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	errDelete := database.DB.Delete(&user).Error
+	if errDelete != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "user was deleted",
+	})
+}
