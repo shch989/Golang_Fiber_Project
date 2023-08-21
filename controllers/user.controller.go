@@ -8,6 +8,7 @@ import (
 	"github.com/shch989/Golang_Fiber_Project/database"
 	"github.com/shch989/Golang_Fiber_Project/models/entity"
 	"github.com/shch989/Golang_Fiber_Project/models/request"
+	"github.com/shch989/Golang_Fiber_Project/utils"
 )
 
 func UserHandlerGetAll(c *fiber.Ctx) error {
@@ -38,11 +39,22 @@ func UserHandlerCreate(c *fiber.Ctx) error {
 	}
 
 	newUser := entity.User{
-		Name:    user.Name,
-		Email:   user.Email,
-		Address: user.Address,
-		Phone:   user.Phone,
+		Name:     user.Name,
+		Email:    user.Email,
+		Address:  user.Address,
+		Phone:    user.Phone,
+		Password: user.Password,
 	}
+
+	hashedPassword, err := utils.HashingPassword(user.Password)
+	if err != nil {
+		log.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "internal server error",
+		})
+	}
+
+	newUser.Password = hashedPassword
 
 	errCreateUser := database.DB.Create(&newUser).Error
 	if errCreateUser != nil {

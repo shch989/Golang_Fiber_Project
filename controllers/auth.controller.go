@@ -8,6 +8,7 @@ import (
 	"github.com/shch989/Golang_Fiber_Project/database"
 	"github.com/shch989/Golang_Fiber_Project/models/entity"
 	"github.com/shch989/Golang_Fiber_Project/models/request"
+	"github.com/shch989/Golang_Fiber_Project/utils"
 )
 
 func LoginHandler(c *fiber.Ctx) error {
@@ -32,7 +33,15 @@ func LoginHandler(c *fiber.Ctx) error {
 	err := database.DB.Where("email = ?", loginRequest.Email).First(&user).Error
 	if err != nil {
 		return c.Status(404).JSON(fiber.Map{
-			"message": err.Error(),
+			"message": "wrong credential",
+			"error":   err.Error(),
+		})
+	}
+
+	isValid := utils.CheckPasswordHash(loginRequest.Password, user.Password)
+	if !isValid {
+		return c.Status(404).JSON(fiber.Map{
+			"message": "wrong credential",
 		})
 	}
 
